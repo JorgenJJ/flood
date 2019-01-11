@@ -6,8 +6,9 @@ class Pixel {
     pos = new PVector(x, y);
     this.h = h;
     print("\nx: " + pos.x + " y: " + pos.y + " height: " + h);
-    stroke(h);
-    rect(pos.x, pos.y, pos.x, pos.y);
+    if (h < 150) stroke(0, h + 50, 0);
+    else stroke(h);
+    point(pos.x, pos.y);
   }
   
   int getX() {
