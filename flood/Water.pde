@@ -3,7 +3,7 @@ class Water {
   
   Water(float x, float y) {
     pos = new PVector(x, y);
-    stroke(0, 0, 150);
+    stroke(221, 73, 19);
     fill(200, 0, 200);
     point(pos.x, pos.y);
   }
