@@ -125,32 +125,17 @@ void draw() {
     PVector lhPos = new PVector(x, y);
     for (int g = -1; g < 2; g++) {
       for (int h = -1; h < 2; h++) {
-        if  (pixel[x + g][y + h].isUnderWater()) {
-          b++;
-        }
-      }
-    }
-    for (int g = -1; g < 2; g++) {
-      for (int h = -1; h < 2; h++) {
         print(" - (" + (x + g) + ", " + (y + h) + ")");
-        if (b == 8) {
-          if (pixel[x + g][y + h].getHeight() < lh || b == 9) {
-            lh = pixel[x + g][y + h].getHeight();
-            lhPos = new PVector(x + g, y + h);
-          }
-        }
-        else {
-          if (pixel[x + g][y + h].getHeight() < lh && !pixel[x + g][y + h].isUnderWater()) {
-            lh = pixel[x + g][y + h].getHeight();
-            lhPos = new PVector(x + g, y + h);
-          }
+        if (pixel[x + g][y + h].getHeight() < lh) {
+          lh = pixel[x + g][y + h].getHeight();
+          lhPos = new PVector(x + g, y + h);
         }
       }
     }
     if (lh == pixel[x][y].getHeight()) pixel[x][y].raiseHeight(1);
     else {
-      water[i].move(lhPos);
-      pixel[x][y].flood();
+      water[i].move(lhPos, pixel[x][y].getHeight());
+      pixel[x][y].raiseHeight(5);
     }
   
   if (lastWater == maxWater) lastWater = 0;
