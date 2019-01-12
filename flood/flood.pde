@@ -41,6 +41,7 @@ void setup() {
     stepSize /= 2;
     print("\nstepSize = " + stepSize);
   }
+  print("\nHighest point: (" + highestPos.x + ", " + highestPos.y + ")");
 }
 
 void diamond(int x, int y, int stepSize) {
@@ -106,19 +107,22 @@ void draw() {
   if (flood) water[lastWater++] = new Water(highestPos.x, highestPos.y);
   if (buff < maxWater) buff = lastWater;
   for (int i = 0; i < buff; i++) {
+    print("\nWater " + i + ": (" + water[i].getX() + ", " + water[i].getY() + ")");
     int x = water[i].getX();
     int y = water[i].getY();
     int lh = pixel[x][y].getHeight();
     PVector lhPos = new PVector(x, y);
     for (int g = -1; g < 2; g++) {
       for (int h = -1; h < 2; h++) {
+        print(" - (" + (x + g) + ", " + (y + h) + ")");  
         if (pixel[x + g][y + h].getHeight() < lh) {
           lh = pixel[x + g][y + h].getHeight();
           lhPos = new PVector(x + g, y + h);
         }
       }
     }
-    water[i].move(lhPos);
+    if (lh == pixel[x][y].getHeight()) pixel[x][y].raiseHeight(1);
+    else water[i].move(lhPos);
   }
 
   if (lastWater == maxWater) lastWater = 0;

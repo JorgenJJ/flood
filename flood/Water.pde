@@ -18,5 +18,6 @@ class Water {
   
   void move(PVector pos) {
     this.pos = pos;
+    point(pos.x, pos.y);
   }
 }

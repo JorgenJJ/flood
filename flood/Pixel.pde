@@ -22,4 +22,8 @@ class Pixel {
   int getHeight() {
     return h;
   }
+  
+  void raiseHeight(int amount) {
+    h += amount;
+  }
 }
