@@ -9,6 +9,7 @@ int lastWater = 0;
 int buff = 0;
 int mx = stepSize / 2;
 int my = stepSize / 2;
+int percentage = 0;
 
 Pixel[][]pixel = new Pixel[size][size];
 Water[]water = new Water[maxWater];
@@ -51,7 +52,7 @@ void setup() {
     stepSize /= 2;
     print("\nstepSize = " + stepSize);
   }
-  print("\nHighest point: (" + highestPos.x + ", " + highestPos.y + ")");
+  print("\nHighest point: (" + highestPos.x + ", " + highestPos.y + "), " + highestPoint + " meters");
 }
 
 void diamond(int x, int y, int stepSize) {
@@ -114,28 +115,32 @@ void square(int x, int y, int stepSize) {
 }
 
 void draw() {
-  if (flood) water[lastWater++] = new Water(mx, my);
-  if (buff < maxWater) buff = lastWater;
-  for (int i = 0; i < buff; i++) {
-    print("\nWater " + i + ": (" + water[i].getX() + ", " + water[i].getY() + ")");
-    int x = water[i].getX();
-    int y = water[i].getY();
-    int lh = pixel[x][y].getHeight();
-    int b = 0;
-    PVector lhPos = new PVector(x, y);
-    for (int g = -1; g < 2; g++) {
-      for (int h = -1; h < 2; h++) {
-        print(" - (" + (x + g) + ", " + (y + h) + ")");
-        if (pixel[x + g][y + h].getHeight() < lh) {
-          lh = pixel[x + g][y + h].getHeight();
-          lhPos = new PVector(x + g, y + h);
+  if (flood && lastWater < maxWater) water[lastWater++] = new Water(mx, my);
+  for (int i = 0; i < lastWater; i++) {
+    if (!water[i].isBasalt()) {
+      print("\nWater " + i + ": (" + water[i].getX() + ", " + water[i].getY() + ")");
+      int x = water[i].getX();
+      int y = water[i].getY();
+      int lh = pixel[x][y].getHeight();
+      PVector lhPos = new PVector(x, y);
+      for (int g = -1; g < 2; g++) {
+        for (int h = -1; h < 2; h++) {
+          print(" - (" + (x + g) + ", " + (y + h) + ")");
+          if (pixel[x + g][y + h].getHeight() < lh) {
+            lh = pixel[x + g][y + h].getHeight();
+            lhPos = new PVector(x + g, y + h);
+          }
         }
       }
-    }
-    if (lh == pixel[x][y].getHeight()) pixel[x][y].raiseHeight(1);
-    else {
-      water[i].move(lhPos, pixel[x][y].getHeight());
-      pixel[x][y].raiseHeight(5);
+      if (lh == pixel[x][y].getHeight()) pixel[x][y].raiseHeight(1);
+      else {
+        if (pixel[int(lhPos.x)][int(lhPos.y)].isUnderWater()) {
+          pixel[int(lhPos.x)][int(lhPos.y)].toBasalt();
+          water[i].toBasalt();
+        }
+        water[i].move(lhPos, pixel[x][y].getHeight());
+        pixel[x][y].raiseHeight(5);
+      }
     }
   
   if (lastWater == maxWater) lastWater = 0;
