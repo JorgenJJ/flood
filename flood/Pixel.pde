@@ -46,4 +46,17 @@ class Pixel {
     stroke(h / 2, h / 2, h / 2);
     point(pos.x, pos.y);
   }
+  
+  void transform(int tr) {
+    if (h > 150) stroke(h, h, h, tr);
+    else if (h < 100) {
+      stroke(0, 0, h + 100, tr);
+      underWater = true;
+    }
+    else stroke(0, h + 50, 0, tr);
+    point(pos.x, pos.y);
+    
+    if (h < 100) underWater = true;
+    else underWater = false;
+  }
 }

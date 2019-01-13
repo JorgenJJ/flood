@@ -1,18 +1,24 @@
 int size = int((float)Math.pow(2, 9)) + 1; // LEAVE 9 FOR 513
 int stepSize = size - 1;
-int variation = 20;
+int variation = 10;
 int highestPoint;
 PVector highestPos;
 boolean flood = false;
+boolean transform = false;
 int maxWater = 1000;
 int lastWater = 0;
 int buff = 0;
 int mx = stepSize / 2;
 int my = stepSize / 2;
 int percentage = 0;
+int lastTouched = 0;
+int counter = 0;
+int transTime = 15;
 
 Pixel[][]pixel = new Pixel[size][size];
 Water[]water = new Water[maxWater];
+
+Pixel[]touchedPixel = new Pixel[size * size];
 
 void setup() {
   frameRate(10);
@@ -115,48 +121,74 @@ void square(int x, int y, int stepSize) {
 }
 
 void draw() {
+  if (lastWater == 0) touchedPixel[lastTouched++] = pixel[mx][my];
   if (flood && lastWater < maxWater) water[lastWater++] = new Water(mx, my);
-  for (int i = 0; i < lastWater; i++) {
-    if (!water[i].isBasalt()) {
-      print("\nWater " + i + ": (" + water[i].getX() + ", " + water[i].getY() + ")");
-      int x = water[i].getX();
-      int y = water[i].getY();
-      int lh = pixel[x][y].getHeight();
-      PVector lhPos = new PVector(x, y);
-      for (int g = -1; g < 2; g++) {
-        for (int h = -1; h < 2; h++) {
-          print(" - (" + (x + g) + ", " + (y + h) + ")");
-          if (pixel[x + g][y + h].getHeight() < lh) {
-            lh = pixel[x + g][y + h].getHeight();
-            lhPos = new PVector(x + g, y + h);
+  if (flood) {
+    transform = false;
+    for (int i = 0; i < lastWater; i++) {
+      if (!water[i].isBasalt()) {
+        print("\nWater " + i + ": (" + water[i].getX() + ", " + water[i].getY() + ")");
+        int x = water[i].getX();
+        int y = water[i].getY();
+        int lh = pixel[x][y].getHeight();
+        PVector lhPos = new PVector(x, y);
+        for (int g = -1; g < 2; g++) {
+          for (int h = -1; h < 2; h++) {
+            if (x + g >= 0 && x + g <= size -1 && y + h >= 0 && y + h <= size - 1) {
+              //print(" - (" + (x + g) + ", " + (y + h) + ")");
+              if (pixel[x + g][y + h].getHeight() < lh) {
+                lh = pixel[x + g][y + h].getHeight();
+                lhPos = new PVector(x + g, y + h);
+              }
+            }
           }
         }
-      }
-      if (lh == pixel[x][y].getHeight()) pixel[x][y].raiseHeight(1);
-      else {
-        if (pixel[int(lhPos.x)][int(lhPos.y)].isUnderWater()) {
-          pixel[int(lhPos.x)][int(lhPos.y)].toBasalt();
-          water[i].toBasalt();
+        if (lh == pixel[x][y].getHeight()) pixel[x][y].raiseHeight(1);
+        else {
+          if (pixel[int(lhPos.x)][int(lhPos.y)].isUnderWater()) {
+            pixel[int(lhPos.x)][int(lhPos.y)].toBasalt();
+            water[i].toBasalt();
+          }
+          touchedPixel[lastTouched++] = pixel[int(lhPos.x)][int(lhPos.y)];
+          water[i].move(lhPos, pixel[x][y].getHeight());
+          pixel[x][y].raiseHeight(5);
         }
-        water[i].move(lhPos, pixel[x][y].getHeight());
-        pixel[x][y].raiseHeight(5);
       }
+    
+    if (lastWater == maxWater) lastWater = 0;
     }
-  
-  if (lastWater == maxWater) lastWater = 0;
+  }
+  else if (transform) {
+    for (int i = 0; i < lastTouched; i++) {
+      touchedPixel[i].transform(20);
+    }
+    counter++;
+    print("\n" + int(((float(counter) * 100) / (float(transTime) * 100)) * 100) + "%");
+    if (counter == transTime) {
+      for (int i = 0; i < lastTouched; i++) {
+        touchedPixel[i].transform(255);
+      }
+      print("\nDONE!");
+      transform = false;
+      lastWater = 0; 
+      counter = 0;
+    }
   }
 }
 
 void keyPressed() {
-  if (key == ENTER || key == RETURN) {
+  if (key == ' ') {
     if (flood) flood = false;
     else flood = true;
+  }
+  else if (key == ENTER || key == RETURN) {
+    if (!flood) transform = true;
+    else transform = false;
   }
 }
 
 void mousePressed() {
   mx = mouseX;
   my = mouseY;
-  if (flood) flood = false;
-  else flood = true;
+  flood = true;
 }
